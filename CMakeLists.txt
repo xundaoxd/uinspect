@@ -12,4 +12,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 file(GLOB_RECURSE SRCS uinspect/*.cc)
 add_library(uinspect SHARED ${SRCS})
 target_include_directories(uinspect PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(uinspect PRIVATE dl)
+
+add_subdirectory(examples)
 

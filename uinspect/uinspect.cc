@@ -1,6 +1,6 @@
-#include <iostream>
+#include "maps.h"
 
 __attribute__((constructor)) void so_main() {
-  std::cout << "uinspect" << std::endl;
+  SetupMaps();
+  DumpMaps();
 }
-
