@@ -1,6 +1,3 @@
-#include "maps.h"
+#include "init.h"
 
-__attribute__((constructor(200))) void so_main() {
-  SetupMaps();
-  DumpMaps();
-}
+__attribute__((constructor(200))) void uinspect_main() { UinspectInit(); }
