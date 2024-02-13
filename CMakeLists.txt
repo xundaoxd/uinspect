@@ -13,6 +13,7 @@ file(GLOB_RECURSE SRCS uinspect/*.cc)
 add_library(uinspect SHARED ${SRCS})
 target_include_directories(uinspect PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(uinspect PRIVATE dl)
+target_compile_options(uinspect PRIVATE -fno-rtti)
 
 add_subdirectory(examples)
 
