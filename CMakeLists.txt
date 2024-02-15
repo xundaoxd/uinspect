@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 project(uinspect VERSION 0.0.1)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -12,8 +12,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 file(GLOB_RECURSE SRCS uinspect/*.cc)
 add_library(uinspect SHARED ${SRCS})
 target_include_directories(uinspect PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(uinspect PRIVATE dl)
-target_compile_options(uinspect PRIVATE -fno-rtti)
+target_link_libraries(uinspect PUBLIC dl)
+target_compile_options(uinspect PUBLIC -fno-rtti)
 
 add_subdirectory(examples)
-
