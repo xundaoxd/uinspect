@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include <cstdio>
+#include <cstring>
 
 #include "elf.h"
 
@@ -55,11 +56,46 @@ static void do_unmmap_self(void* addr, size_t size) {
   munmap(addr, size);
 }
 
-#include <stdio.h>
-
 static void do_main_hook(void* self_addr) {
+  struct SymEntry {
+    ElfW(Sym) * sym;
+    ElfW(Addr) virt_addr;
+    ElfW(Word) prot;
+    ElfW(Addr) virt_begin;
+    ElfW(Xword) virt_size;
+  };
+  SymEntry sym_entry;
+  sym_entry.sym = elf_find_symbol((ElfW(Ehdr)*)self_addr, "main");
+
+  if (!dl_iterate_phdr(
+          [](struct dl_phdr_info* info, size_t size, void* data) -> int {
+            (void)size;
+            SymEntry* entry = (SymEntry*)data;
+            if (!strlen(info->dlpi_name)) {
+              return 0;
+            }
+            for (ElfW(Half) i = 0; i < info->dlpi_phnum; i++) {
+              const ElfW(Phdr)& phdr = info->dlpi_phdr[i];
+              if (phdr.p_offset <= entry->sym->st_value &&
+                  (phdr.p_offset + phdr.p_filesz > entry->sym->st_value)) {
+                entry->virt_addr = info->dlpi_addr + phdr.p_vaddr +
+                                   entry->sym->st_value - phdr.p_offset;
+                entry->prot = phdr.p_flags;
+                entry->virt_begin = info->dlpi_addr + phdr.p_vaddr;
+                entry->virt_size = phdr.p_memsz;
+                return 1;
+              }
+            }
+            return 0;
+          },
+          &sym_entry)) {
+    perror("can't find virt address");
+    return;
+  }
+  if (mprotect((void*)sym_entry.virt_begin, sym_entry.virt_size,
+               sym_entry.prot | PROT_WRITE)) {
+    perror("can't set virt page prot");
+    return;
+  }
   // TODO: hook main func
-  ElfW(Ehdr)* hdr = (ElfW(Ehdr)*)self_addr;
-  ElfW(Sym)* main_sym = elf_find_symbol(hdr, "main");
-  printf("main func addr: 0x%lx\n", main_sym->st_value);
 }
