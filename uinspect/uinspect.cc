@@ -6,21 +6,22 @@
 
 #include "elf.h"
 
-void* self_addr;
-size_t self_size;
-
 static void* do_mmap_self(size_t* size);
 static void do_unmmap_self(void* addr, size_t size);
-static void do_main_hook();
+
+static void do_main_hook(void* self_addr);
 
 __attribute__((constructor)) void uinspect_init() {
+  void* self_addr;
+  size_t self_size;
+
   self_addr = do_mmap_self(&self_size);
   if (self_addr == MAP_FAILED) {
     return;
   }
-  do_main_hook();
-}
-__attribute__((destructor)) void uinspect_uninit() {
+
+  do_main_hook(self_addr);
+
   do_unmmap_self(self_addr, self_size);
 }
 
@@ -51,7 +52,11 @@ static void do_unmmap_self(void* addr, size_t size) {
   munmap(addr, size);
 }
 
-static void do_main_hook() {
-  ElfW(Ehdr)* hdr = (ElfW(Ehdr)*)self_addr;
+#include <stdio.h>
+
+static void do_main_hook(void* self_addr) {
   // TODO: hook main func
+  ElfW(Ehdr)* hdr = (ElfW(Ehdr)*)self_addr;
+  ElfW(Sym)* main_sym = elf_find_symbol(hdr, "main");
+  printf("main func addr: 0x%lx\n", main_sym->st_value);
 }
