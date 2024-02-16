@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <cstdio>
+
 #include "elf.h"
 
 static void* do_mmap_self(size_t* size);
@@ -17,6 +19,7 @@ __attribute__((constructor)) void uinspect_init() {
 
   self_addr = do_mmap_self(&self_size);
   if (self_addr == MAP_FAILED) {
+    perror("mmap self failed");
     return;
   }
 

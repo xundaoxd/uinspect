@@ -1,7 +1,9 @@
 #pragma once
 #include <cstring>
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE /* See feature_test_macros(7) */
+#endif              // !_GNU_SOURCE
 #include <link.h>
 
 inline ElfW(Shdr) * elf_get_section(ElfW(Ehdr) * hdr, ElfW(Half) idx) {
@@ -32,7 +34,8 @@ inline ElfW(Sym) * elf_find_symbol(ElfW(Ehdr) * hdr, const char* name) {
   if (!tab_section) {
     return nullptr;
   }
-  for (int j = 0; j < tab_section->sh_size / tab_section->sh_entsize; j++) {
+  for (ElfW(Xword) j = 0; j < tab_section->sh_size / tab_section->sh_entsize;
+       j++) {
     ElfW(Sym)* sym = (ElfW(Sym)*)((char*)hdr + tab_section->sh_offset +
                                   j * tab_section->sh_entsize);
     if (strcmp(name, (const char*)(hdr) + str_section->sh_offset +
