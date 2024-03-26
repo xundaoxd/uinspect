@@ -1,18 +1,19 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.17)
 project(uinspect VERSION 0.0.1)
+
+include(GNUInstallDirs)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard to conform to")
-set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE BOOL "Require the specified C++ standard for all targets")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+message(STATUS "setting C++ standard to C++${CMAKE_CXX_STANDARD}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pipe")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -rdynamic -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-inline")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
-file(GLOB_RECURSE SRCS uinspect/*.cc)
-add_library(uinspect SHARED ${SRCS})
-target_include_directories(uinspect PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(uinspect PUBLIC dl)
-target_compile_options(uinspect PUBLIC -fno-rtti)
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include;${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+add_subdirectory(src)
 add_subdirectory(examples)
+
