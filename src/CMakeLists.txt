@@ -1,2 +1,2 @@
-add_library(uinspect SHARED uinspect.cc)
+add_library(uinspect uinspect.cc)
 
