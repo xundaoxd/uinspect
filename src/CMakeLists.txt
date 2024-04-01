@@ -1,2 +1,2 @@
-add_library(uinspect uinspect.cc)
+add_executable(uinspect uinspect.cc)
 

@@ -1,5 +1,4 @@
-#include <stdio.h>
-
-__attribute__((constructor)) void uinspect_main() {
-  printf("uinspect hello\n");
+int main(int argc, char *argv[])
+{
+    return 0;
 }
