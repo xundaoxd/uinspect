@@ -20,12 +20,12 @@ static void func_listener_init(FuncListener *inst) {}
 static void func_listener_on_enter(GumInvocationListener *listener,
                                    GumInvocationContext *ic) {
   const char *func = GUM_IC_GET_FUNC_DATA(ic, const char *);
-  printf("func %s listener enter\n", func);
+  printf("[%s] enter\n", func);
 }
 static void func_listener_on_leave(GumInvocationListener *listener,
                                    GumInvocationContext *ic) {
   const char *func = GUM_IC_GET_FUNC_DATA(ic, const char *);
-  printf("func %s listener leave\n", func);
+  printf("[%s] leave\n", func);
 }
 
 static void func_listener_iface_init(gpointer g_iface, gpointer iface_data) {
