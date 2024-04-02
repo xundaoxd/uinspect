@@ -17,4 +17,5 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include;${CMAKE_CURRENT_SOURCE_
 find_package(frida REQUIRED)
 
 add_subdirectory(src)
+add_subdirectory(examples)
 
