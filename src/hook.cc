@@ -10,19 +10,22 @@
 namespace uinspect {
 
 struct HookEntry {
+  std::string slot;
   std::string soname;
   std::string sym;
-  void (*enter)();
-  void (*exit)();
+  void (*enter)(const char *, GumCpuContext *);
+  void (*exit)(const char *, GumCpuContext *);
 };
 std::vector<HookEntry> entries;
-void uinspect_hook(const char *slot, void (*enter)(), void (*exit)()) {
+void do_hook(const char *slot, void (*enter)(const char *, GumCpuContext *),
+             void (*exit)(const char *, GumCpuContext *)) {
   const char *so_end = index(slot, ':');
   if (so_end == NULL) {
     fprintf(stderr, "[uinspect] hook format invalid, hook: %s\n", slot);
     return;
   }
   HookEntry entry;
+  entry.slot = slot;
   entry.soname = std::string(slot, so_end - slot);
   entry.sym = std::string(so_end + 1, so_end + 1 + strlen(so_end + 1));
   entry.enter = enter;
@@ -47,12 +50,12 @@ static void func_listener_iface_init(gpointer g_iface, gpointer) {
   iface->on_enter = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    entry->enter();
+    entry->enter(entry->slot.c_str(), ic->cpu_context);
   };
   iface->on_leave = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    entry->exit();
+    entry->exit(entry->slot.c_str(), ic->cpu_context);
   };
 }
 

@@ -4,6 +4,8 @@
 #include "common.h"
 #include "hook.h"
 
+bool hook_flag = false;
+
 #define MAIN_TYPE_LISTENER (main_listener_get_type())
 G_DECLARE_FINAL_TYPE(MainListener, main_listener, MAIN, LISTENER, GObject)
 
@@ -16,12 +18,13 @@ static void main_listener_init(MainListener *) {}
 static void main_listener_iface_init(gpointer g_iface, gpointer) {
   GumInvocationListenerInterface *iface =
       (GumInvocationListenerInterface *)g_iface;
-  iface->on_enter = [](GumInvocationListener *, GumInvocationContext *ic) {
+  iface->on_enter = [](GumInvocationListener *, GumInvocationContext *) {
     hook_init();
+    hook_flag = true;
   };
-  iface->on_leave = [](GumInvocationListener *, GumInvocationContext *ic) {
-    hook_deinit();
-  };
+  // iface->on_leave = [](GumInvocationListener *, GumInvocationContext *) {
+  //   hook_deinit();
+  // };
 }
 
 G_DEFINE_TYPE_EXTENDED(MainListener, main_listener, G_TYPE_OBJECT, 0,
@@ -54,6 +57,9 @@ __attribute__((constructor)) void uinspect_init() {
 }
 
 __attribute__((destructor)) void uinspect_deinit() {
+  if (hook_flag) {
+    hook_deinit();
+  }
   gum_interceptor_detach(interceptor, main_listener);
   g_object_unref(main_listener);
   g_object_unref(interceptor);

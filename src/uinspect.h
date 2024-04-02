@@ -1,12 +1,16 @@
 #pragma once
 
+#include "frida-gum.h"
+
 namespace uinspect {
 
-void uinspect_hook(const char* slot, void (*enter)(), void (*exit)());
+void do_hook(const char *slot, void (*enter)(const char *, GumCpuContext *),
+             void (*exit)(const char *, GumCpuContext *));
 
 struct HookRegister {
-  HookRegister(const char* slot, void (*enter)(), void (*exit)()) {
-    uinspect_hook(slot, enter, exit);
+  HookRegister(const char *slot, void (*enter)(const char *, GumCpuContext *),
+               void (*exit)(const char *, GumCpuContext *)) {
+    do_hook(slot, enter, exit);
   }
 };
 
