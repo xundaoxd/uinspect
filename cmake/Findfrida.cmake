@@ -24,10 +24,12 @@ FetchContent_Declare(
 )
 FetchContent_Populate(frida-gum)
 
-set(frida_INCLUDE_DIRS "${frida-gum_SOURCE_DIR}")
-set(frida_LIBRARIES "${frida-gum_SOURCE_DIR}/libfrida-gum.a")
+set(frida_INCLUDE_DIR "${frida-gum_SOURCE_DIR}")
+set(frida_LIBRARY "${frida-gum_SOURCE_DIR}/libfrida-gum.a")
 
-add_library(frida INTERFACE)
-target_include_directories(frida INTERFACE "${frida_INCLUDE_DIRS}")
-target_link_libraries(frida INTERFACE "${frida_LIBRARIES}")
+add_library(frida::frida STATIC IMPORTED)
+set_target_properties(frida::frida PROPERTIES
+    IMPORTED_LOCATION "${frida_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${frida_INCLUDE_DIR}"
+    INTERFACE_LINK_LIBRARIES "dl;pthread")
 
