@@ -46,7 +46,7 @@ __attribute__((constructor)) void uinspect_enter() {
   gum_interceptor_attach(
       interceptor,
       GSIZE_TO_POINTER(gum_module_find_export_by_name(NULL, "_Z5printv")),
-      listener, GSIZE_TO_POINTER("main"));
+      listener, GSIZE_TO_POINTER("print"));
   gum_interceptor_end_transaction(interceptor);
 }
 

@@ -1,3 +1,6 @@
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(gobject REQUIRED IMPORTED_TARGET gobject-2.0)
+
 message(STATUS "System Name: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "System Version: ${CMAKE_SYSTEM_VERSION}")
 message(STATUS "System Processor: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -31,5 +34,5 @@ add_library(frida::frida STATIC IMPORTED)
 set_target_properties(frida::frida PROPERTIES
     IMPORTED_LOCATION "${frida_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES "${frida_INCLUDE_DIR}"
-    INTERFACE_LINK_LIBRARIES "dl;pthread")
+    INTERFACE_LINK_LIBRARIES "dl;pthread;PkgConfig::gobject")
 
