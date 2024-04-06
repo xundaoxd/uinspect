@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "HookCtx.h"
 #include "HookRegistry.h"
 #include "frida-gum.h"
 
@@ -22,12 +23,18 @@ static void func_listener_iface_init(gpointer g_iface, gpointer) {
   iface->on_enter = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    entry->enter(entry->slot.c_str(), ic->cpu_context);
+    auto ctx = uinspect::HookCtx::Instance();
+    ctx->hook_ctx = entry;
+    ctx->cpu_ctx = ic->cpu_context;
+    entry->enter();
   };
   iface->on_leave = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    entry->exit(entry->slot.c_str(), ic->cpu_context);
+    auto ctx = uinspect::HookCtx::Instance();
+    ctx->hook_ctx = entry;
+    ctx->cpu_ctx = ic->cpu_context;
+    entry->exit();
   };
 }
 

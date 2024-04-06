@@ -11,8 +11,8 @@ struct HookEntry {
   std::string slot;
   std::string soname;
   std::string sym;
-  void (*enter)(const char *, GumCpuContext *);
-  void (*exit)(const char *, GumCpuContext *);
+  void (*enter)();
+  void (*exit)();
 };
 
 struct HookRegistry {
@@ -20,9 +20,7 @@ struct HookRegistry {
   static HookRegistry *Instance();
 };
 
-inline void new_hook(const char *slot,
-                     void (*enter)(const char *, GumCpuContext *),
-                     void (*exit)(const char *, GumCpuContext *)) {
+inline void new_hook(const char *slot, void (*enter)(), void (*exit)()) {
   const char *so_end = index(slot, ':');
   if (so_end == NULL) {
     fprintf(stderr, "[uinspect] hook format invalid, hook: %s\n", slot);
