@@ -9,6 +9,7 @@ struct HookCtx {
   const HookEntry* hook_ctx;
   const GumCpuContext* cpu_ctx;
 
+  // thread local instance
   static HookCtx* Instance();
 };
 

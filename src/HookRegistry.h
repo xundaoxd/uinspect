@@ -1,9 +1,8 @@
 #pragma once
 
+#include <cstring>
 #include <string>
 #include <vector>
-
-#include "frida-gum.h"
 
 namespace uinspect {
 
