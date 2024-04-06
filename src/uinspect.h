@@ -1,3 +1,3 @@
 #pragma once
 
-#include "hook.h"
+#include "HookRegistry.h"

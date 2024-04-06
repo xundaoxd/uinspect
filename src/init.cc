@@ -1,15 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "common.h"
+#include "frida-gum.h"
 #include "hook.h"
 
-namespace {
-
-bool uinspect_inited = false;
-bool hook_inited = false;
-
-}  // namespace
+static bool uinspect_inited = false;
+static bool hook_inited = false;
 
 #define MAIN_TYPE_LISTENER (main_listener_get_type())
 G_DECLARE_FINAL_TYPE(MainListener, main_listener, MAIN, LISTENER, GObject)
@@ -25,14 +18,12 @@ static void main_listener_iface_init(gpointer g_iface, gpointer) {
       (GumInvocationListenerInterface *)g_iface;
   iface->on_enter = [](GumInvocationListener *, GumInvocationContext *) {
     if (hook_inited) {
+      fprintf(stderr, "[uinspect] call init multiple times, ignore\n");
       return;
     }
     uinspect::hook_init();
     hook_inited = true;
   };
-  // iface->on_leave = [](GumInvocationListener *, GumInvocationContext *) {
-  //   hook_deinit();
-  // };
 }
 
 G_DEFINE_TYPE_EXTENDED(MainListener, main_listener, G_TYPE_OBJECT, 0,
@@ -40,9 +31,9 @@ G_DEFINE_TYPE_EXTENDED(MainListener, main_listener, G_TYPE_OBJECT, 0,
                                              main_listener_iface_init))
 
 GumInterceptor *interceptor;
-GumInvocationListener *main_listener;
+static GumInvocationListener *main_listener;
 
-__attribute__((constructor)) void uinspect_init() {
+static __attribute__((constructor)) void uinspect_init() {
   const char *entry = getenv("UINSPECT_ENTRY");
   if (entry == NULL) {
     entry = "main";
@@ -65,7 +56,7 @@ __attribute__((constructor)) void uinspect_init() {
   uinspect_inited = true;
 }
 
-__attribute__((destructor)) void uinspect_deinit() {
+static __attribute__((destructor)) void uinspect_deinit() {
   if (uinspect_inited) {
     if (hook_inited) {
       uinspect::hook_deinit();

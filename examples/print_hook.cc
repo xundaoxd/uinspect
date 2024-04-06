@@ -9,4 +9,4 @@ static void print_exit(const char *, GumCpuContext *) {
   std::cout << "[uinspect] print leave" << std::endl;
 }
 
-HOOK(":_Z5printv", print_enter, print_exit)
+UINSPECT_HOOK(":_Z5printv", print_enter, print_exit)
