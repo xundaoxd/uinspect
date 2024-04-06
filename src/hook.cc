@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-namespace uinspect {
+namespace {
 
 struct HookEntry {
   std::string slot;
@@ -17,6 +17,39 @@ struct HookEntry {
   void (*exit)(const char *, GumCpuContext *);
 };
 std::vector<HookEntry> entries;
+
+GumInvocationListener *hook_listener;
+
+}  // namespace
+
+#define FUNC_TYPE_LISTENER (func_listener_get_type())
+G_DECLARE_FINAL_TYPE(FuncListener, func_listener, FUNC, LISTENER, GObject)
+
+struct _FuncListener {
+  GObject parent;
+};
+
+static void func_listener_class_init(FuncListenerClass *) {}
+static void func_listener_init(FuncListener *) {}
+static void func_listener_iface_init(gpointer g_iface, gpointer) {
+  GumInvocationListenerInterface *iface =
+      (GumInvocationListenerInterface *)g_iface;
+  iface->on_enter = [](GumInvocationListener *, GumInvocationContext *ic) {
+    HookEntry *entry = GUM_IC_GET_FUNC_DATA(ic, HookEntry *);
+    entry->enter(entry->slot.c_str(), ic->cpu_context);
+  };
+  iface->on_leave = [](GumInvocationListener *, GumInvocationContext *ic) {
+    HookEntry *entry = GUM_IC_GET_FUNC_DATA(ic, HookEntry *);
+    entry->exit(entry->slot.c_str(), ic->cpu_context);
+  };
+}
+
+G_DEFINE_TYPE_EXTENDED(FuncListener, func_listener, G_TYPE_OBJECT, 0,
+                       G_IMPLEMENT_INTERFACE(GUM_TYPE_INVOCATION_LISTENER,
+                                             func_listener_iface_init))
+
+namespace uinspect {
+
 void do_hook(const char *slot, void (*enter)(const char *, GumCpuContext *),
              void (*exit)(const char *, GumCpuContext *)) {
   const char *so_end = index(slot, ':');
@@ -33,43 +66,11 @@ void do_hook(const char *slot, void (*enter)(const char *, GumCpuContext *),
   entries.emplace_back(std::move(entry));
 }
 
-}  // namespace uinspect
-
-#define FUNC_TYPE_LISTENER (func_listener_get_type())
-G_DECLARE_FINAL_TYPE(FuncListener, func_listener, FUNC, LISTENER, GObject)
-
-struct _FuncListener {
-  GObject parent;
-};
-
-static void func_listener_class_init(FuncListenerClass *) {}
-static void func_listener_init(FuncListener *) {}
-static void func_listener_iface_init(gpointer g_iface, gpointer) {
-  GumInvocationListenerInterface *iface =
-      (GumInvocationListenerInterface *)g_iface;
-  iface->on_enter = [](GumInvocationListener *, GumInvocationContext *ic) {
-    uinspect::HookEntry *entry =
-        GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    entry->enter(entry->slot.c_str(), ic->cpu_context);
-  };
-  iface->on_leave = [](GumInvocationListener *, GumInvocationContext *ic) {
-    uinspect::HookEntry *entry =
-        GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    entry->exit(entry->slot.c_str(), ic->cpu_context);
-  };
-}
-
-G_DEFINE_TYPE_EXTENDED(FuncListener, func_listener, G_TYPE_OBJECT, 0,
-                       G_IMPLEMENT_INTERFACE(GUM_TYPE_INVOCATION_LISTENER,
-                                             func_listener_iface_init))
-
-GumInvocationListener *hook_listener;
-
 void hook_init() {
   hook_listener =
       (GumInvocationListener *)g_object_new(FUNC_TYPE_LISTENER, NULL);
   gum_interceptor_begin_transaction(interceptor);
-  for (auto &&entry : uinspect::entries) {
+  for (auto &&entry : entries) {
     GumAddress entry_addr =
         gum_module_find_export_by_name(NULL, entry.sym.c_str());
     if (!entry_addr) {
@@ -86,3 +87,5 @@ void hook_deinit() {
   gum_interceptor_detach(interceptor, hook_listener);
   g_object_unref(hook_listener);
 }
+
+}  // namespace uinspect

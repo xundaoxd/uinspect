@@ -4,7 +4,12 @@
 #include "common.h"
 #include "hook.h"
 
-bool hook_flag = false;
+namespace {
+
+bool uinspect_inited = false;
+bool hook_inited = false;
+
+}  // namespace
 
 #define MAIN_TYPE_LISTENER (main_listener_get_type())
 G_DECLARE_FINAL_TYPE(MainListener, main_listener, MAIN, LISTENER, GObject)
@@ -19,8 +24,11 @@ static void main_listener_iface_init(gpointer g_iface, gpointer) {
   GumInvocationListenerInterface *iface =
       (GumInvocationListenerInterface *)g_iface;
   iface->on_enter = [](GumInvocationListener *, GumInvocationContext *) {
-    hook_init();
-    hook_flag = true;
+    if (hook_inited) {
+      return;
+    }
+    uinspect::hook_init();
+    hook_inited = true;
   };
   // iface->on_leave = [](GumInvocationListener *, GumInvocationContext *) {
   //   hook_deinit();
@@ -54,14 +62,17 @@ __attribute__((constructor)) void uinspect_init() {
   gum_interceptor_attach(interceptor, GSIZE_TO_POINTER(entry_addr),
                          main_listener, nullptr);
   gum_interceptor_end_transaction(interceptor);
+  uinspect_inited = true;
 }
 
 __attribute__((destructor)) void uinspect_deinit() {
-  if (hook_flag) {
-    hook_deinit();
+  if (uinspect_inited) {
+    if (hook_inited) {
+      uinspect::hook_deinit();
+    }
+    gum_interceptor_detach(interceptor, main_listener);
+    g_object_unref(main_listener);
+    g_object_unref(interceptor);
+    gum_deinit_embedded();
   }
-  gum_interceptor_detach(interceptor, main_listener);
-  g_object_unref(main_listener);
-  g_object_unref(interceptor);
-  gum_deinit_embedded();
 }
