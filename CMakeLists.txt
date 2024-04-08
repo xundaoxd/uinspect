@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.17)
 project(uinspect VERSION 0.0.1)
 
 include(GNUInstallDirs)
@@ -12,5 +12,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pipe")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -rdynamic -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-inline")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include;${CMAKE_CURRENT_SOURCE_DIR}/src")
+
+option(UINSPECT_BUILD_EXAMPLE "Build Example" OFF)
+
 add_subdirectory(src)
-add_subdirectory(examples)
+
+if(${UINSPECT_BUILD_EXAMPLE})
+    add_subdirectory(examples)
+endif()
+
