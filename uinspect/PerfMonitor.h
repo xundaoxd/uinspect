@@ -31,15 +31,6 @@ class PerfMonitor {
 
  public:
   int Monitor(struct perf_event_attr *hw_event, std::uint64_t *val) {
-    hw_event->disabled = 1;
-    hw_event->inherit = 0;
-    hw_event->exclude_kernel = 1;
-    hw_event->exclude_hv = 1;
-    hw_event->exclude_guest = 1;
-    hw_event->exclude_idle = 1;
-
-    hw_event->read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
-
     int ret = Monitor(hw_event, 0, -1, 0);
     if (ret != -1) {
       std::uint64_t id;
@@ -56,6 +47,15 @@ class PerfMonitor {
     pe.type = PERF_TYPE_SOFTWARE;
     pe.config = e;
 
+    pe.disabled = 1;
+    pe.inherit = 0;
+    pe.exclude_kernel = 1;
+    pe.exclude_hv = 1;
+    pe.exclude_guest = 1;
+    pe.exclude_idle = 1;
+
+    pe.read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
+
     return Monitor(&pe, val);
   }
   int Monitor(perf_hw_id e, std::uint64_t *val) {
@@ -65,6 +65,15 @@ class PerfMonitor {
     pe.size = sizeof(pe);
     pe.type = PERF_TYPE_HARDWARE;
     pe.config = e;
+
+    pe.disabled = 1;
+    pe.inherit = 0;
+    pe.exclude_kernel = 1;
+    pe.exclude_hv = 1;
+    pe.exclude_guest = 1;
+    pe.exclude_idle = 1;
+
+    pe.read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
 
     return Monitor(&pe, val);
   }
@@ -96,4 +105,3 @@ class PerfMonitor {
 };
 
 }  // namespace uinspect
-
