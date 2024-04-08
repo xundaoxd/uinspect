@@ -4,6 +4,7 @@
 
 #include "HookRegistry.h"
 #include "frida-gum.h"
+#include "spdlog/spdlog.h"
 
 #define FUNC_TYPE_LISTENER (func_listener_get_type())
 G_DECLARE_FINAL_TYPE(FuncListener, func_listener, FUNC, LISTENER, GObject)
@@ -46,8 +47,7 @@ void HookInit() {
     GumAddress entry_addr =
         gum_module_find_export_by_name(NULL, entry.sym.c_str());
     if (!entry_addr) {
-      fprintf(stderr, "[uinspect] cannot find sym address, sym: %s\n",
-              entry.sym.c_str());
+      spdlog::warn("cannot find sym address, sym: {}", entry.sym);
       continue;
     }
     gum_interceptor_attach(interceptor, GSIZE_TO_POINTER(entry_addr),

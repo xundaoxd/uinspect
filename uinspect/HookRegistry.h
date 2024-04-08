@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "common.h"
+#include "spdlog/spdlog.h"
 
 namespace uinspect {
 
@@ -25,7 +26,7 @@ inline void new_hook(const char *slot, void (*enter)(HookEntry *),
                      void (*exit)(HookEntry *)) {
   const char *so_end = index(slot, ':');
   if (so_end == NULL) {
-    fprintf(stderr, "[uinspect] hook format invalid, hook: %s\n", slot);
+    spdlog::warn("hook format invalid, hook: {}", slot);
     return;
   }
   HookEntry entry;

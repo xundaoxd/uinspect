@@ -1,5 +1,6 @@
 #include "Hook.h"
 #include "frida-gum.h"
+#include "spdlog/spdlog.h"
 
 static bool uinspect_inited = false;
 static bool hook_inited = false;
@@ -18,7 +19,7 @@ static void main_listener_iface_init(gpointer g_iface, gpointer) {
       (GumInvocationListenerInterface *)g_iface;
   iface->on_enter = [](GumInvocationListener *, GumInvocationContext *) {
     if (hook_inited) {
-      fprintf(stderr, "[uinspect] call init multiple times, ignore\n");
+      spdlog::warn("call init multiple times, ignore");
       return;
     }
     uinspect::HookInit();
@@ -42,7 +43,7 @@ void uinspect_init() {
   }
   GumAddress entry_addr = gum_module_find_export_by_name(NULL, entry);
   if (!entry_addr) {
-    fprintf(stderr, "[uinspect] cannot find entry address, entry: %s\n", entry);
+    spdlog::warn("cannot find entry address, entry: {}", entry);
     return;
   }
 
