@@ -1,8 +1,8 @@
 #include <cstdint>
 #include <iostream>
 
-#include "PerfMonitor.h"
-#include "uinspect.h"
+#include "uinspect/HookRegistry.h"
+#include "uinspect/PerfMonitor.h"
 
 std::uint64_t page_fault = 0;
 std::uint64_t inst = 0;
@@ -16,12 +16,12 @@ thread_local uinspect::PerfMonitor monitor = []() {
   return monitor;
 }();
 
-static void print_enter(uinspect::HookEntry* hook) {
+static void print_enter(uinspect::HookEntry*) {
   std::cout << "[uinspect] print enter" << std::endl;
   monitor.Update();
   monitor.Enable();
 }
-static void print_exit(uinspect::HookEntry* hook) {
+static void print_exit(uinspect::HookEntry*) {
   monitor.Disable();
   auto prev_fault = page_fault;
   auto prev_cycle = cycle;
