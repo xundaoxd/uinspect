@@ -33,7 +33,9 @@ G_DEFINE_TYPE_EXTENDED(MainListener, main_listener, G_TYPE_OBJECT, 0,
 GumInterceptor *interceptor;
 static GumInvocationListener *main_listener;
 
-static __attribute__((constructor)) void uinspect_init() {
+namespace uinspect {
+
+void uinspect_init() {
   const char *entry = getenv("UINSPECT_ENTRY");
   if (entry == NULL) {
     entry = "main";
@@ -56,7 +58,7 @@ static __attribute__((constructor)) void uinspect_init() {
   uinspect_inited = true;
 }
 
-static __attribute__((destructor)) void uinspect_deinit() {
+void uinspect_deinit() {
   if (uinspect_inited) {
     if (hook_inited) {
       uinspect::HookDeinit();
@@ -67,3 +69,5 @@ static __attribute__((destructor)) void uinspect_deinit() {
     gum_deinit_embedded();
   }
 }
+
+}  // namespace uinspect

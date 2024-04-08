@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "common.h"
+
 namespace uinspect {
 
 struct HookEntry {
@@ -37,12 +39,5 @@ inline void new_hook(const char *slot, void (*enter)(HookEntry *),
 
 }  // namespace uinspect
 
-#define UINSPECT__CAT(x, y) x##y
-#define UINSPECT_CAT(x, y) UINSPECT__CAT(x, y)
-
-#define UINSPECT_HOOK(...)                             \
-  static int UINSPECT_CAT(uinspect_hook_register_,     \
-                          __COUNTER__) = []() -> int { \
-    uinspect::new_hook(__VA_ARGS__);                   \
-    return 0;                                          \
-  }();
+#define UINSPECT_HOOK(...) \
+  UINSPECT_CONSTRUCTOR([]() { ::uinspect::new_hook(__VA_ARGS__); })
