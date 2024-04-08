@@ -2,7 +2,7 @@
 
 namespace uinspect {
 
-void hook_init();
-void hook_deinit();
+void HookInit();
+void HookDeinit();
 
 }  // namespace uinspect

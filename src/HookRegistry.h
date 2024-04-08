@@ -28,7 +28,7 @@ inline void new_hook(const char *slot, void (*enter)(), void (*exit)()) {
   HookEntry entry;
   entry.slot = slot;
   entry.soname = std::string(slot, so_end - slot);
-  entry.sym = std::string(so_end + 1, so_end + 1 + strlen(so_end + 1));
+  entry.sym = std::string(so_end + 1, strlen(so_end + 1));
   entry.enter = enter;
   entry.exit = exit;
   HookRegistry::Instance()->hooks.emplace_back(std::move(entry));

@@ -1,5 +1,5 @@
+#include "Hook.h"
 #include "frida-gum.h"
-#include "hook.h"
 
 static bool uinspect_inited = false;
 static bool hook_inited = false;
@@ -21,7 +21,7 @@ static void main_listener_iface_init(gpointer g_iface, gpointer) {
       fprintf(stderr, "[uinspect] call init multiple times, ignore\n");
       return;
     }
-    uinspect::hook_init();
+    uinspect::HookInit();
     hook_inited = true;
   };
 }
@@ -59,7 +59,7 @@ static __attribute__((constructor)) void uinspect_init() {
 static __attribute__((destructor)) void uinspect_deinit() {
   if (uinspect_inited) {
     if (hook_inited) {
-      uinspect::hook_deinit();
+      uinspect::HookDeinit();
     }
     gum_interceptor_detach(interceptor, main_listener);
     g_object_unref(main_listener);

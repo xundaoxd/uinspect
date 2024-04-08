@@ -1,10 +1,7 @@
-#include "hook.h"
+#include "Hook.h"
 
 #include <strings.h>
 
-#include <string>
-
-#include "HookCtx.h"
 #include "HookRegistry.h"
 #include "frida-gum.h"
 
@@ -23,17 +20,11 @@ static void func_listener_iface_init(gpointer g_iface, gpointer) {
   iface->on_enter = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    auto ctx = uinspect::HookCtx::Instance();
-    ctx->hook_ctx = entry;
-    ctx->cpu_ctx = ic->cpu_context;
     entry->enter();
   };
   iface->on_leave = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    auto ctx = uinspect::HookCtx::Instance();
-    ctx->hook_ctx = entry;
-    ctx->cpu_ctx = ic->cpu_context;
     entry->exit();
   };
 }
@@ -47,7 +38,7 @@ static GumInvocationListener *hook_listener;
 
 namespace uinspect {
 
-void hook_init() {
+void HookInit() {
   hook_listener =
       (GumInvocationListener *)g_object_new(FUNC_TYPE_LISTENER, NULL);
   gum_interceptor_begin_transaction(interceptor);
@@ -64,7 +55,7 @@ void hook_init() {
   }
   gum_interceptor_end_transaction(interceptor);
 }
-void hook_deinit() {
+void HookDeinit() {
   gum_interceptor_detach(interceptor, hook_listener);
   g_object_unref(hook_listener);
 }
