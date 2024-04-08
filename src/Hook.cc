@@ -20,12 +20,12 @@ static void func_listener_iface_init(gpointer g_iface, gpointer) {
   iface->on_enter = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    entry->enter();
+    entry->enter(entry);
   };
   iface->on_leave = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    entry->exit();
+    entry->exit(entry);
   };
 }
 
