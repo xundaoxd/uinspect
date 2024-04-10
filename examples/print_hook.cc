@@ -13,16 +13,15 @@ thread_local uinspect::PerfMonitor monitor = []() {
   monitor.Monitor(PERF_COUNT_HW_CPU_CYCLES, &cycle);
   monitor.Monitor(PERF_COUNT_HW_INSTRUCTIONS, &inst);
   monitor.Reset();
+  monitor.Enable();
   return monitor;
 }();
 
 static void print_enter(uinspect::HookEntry*) {
   std::cout << "[uinspect] print enter" << std::endl;
   monitor.Update();
-  monitor.Enable();
 }
 static void print_exit(uinspect::HookEntry*) {
-  monitor.Disable();
   auto prev_fault = page_fault;
   auto prev_cycle = cycle;
   auto prev_inst = inst;
