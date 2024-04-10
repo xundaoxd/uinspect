@@ -21,6 +21,6 @@ target_link_libraries(uinspect PUBLIC frida::frida spdlog)
 
 option(UINSPECT_BUILD_EXAMPLE "Build Example" ON)
 if(${UINSPECT_BUILD_EXAMPLE})
-    add_subdirectory(examples)
+    add_subdirectory(example)
 endif()
 

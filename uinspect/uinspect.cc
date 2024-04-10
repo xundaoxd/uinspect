@@ -17,14 +17,29 @@ static void main_listener_init(MainListener *) {}
 static void main_listener_iface_init(gpointer g_iface, gpointer) {
   GumInvocationListenerInterface *iface =
       (GumInvocationListenerInterface *)g_iface;
-  iface->on_enter = [](GumInvocationListener *, GumInvocationContext *) {
-    if (hook_inited) {
-      spdlog::warn("call init multiple times, ignore");
-      return;
+  iface->on_enter = [](GumInvocationListener *, GumInvocationContext *ic) {
+    std::size_t tp = GUM_IC_GET_FUNC_DATA(ic, std::size_t);
+    if (tp == 'p') {
+      if (hook_inited) {
+        spdlog::warn("call init multiple times, ignore");
+        return;
+      }
+      uinspect::HookInit();
+      hook_inited = true;
     }
-    uinspect::HookInit();
-    hook_inited = true;
   };
+  iface->on_leave = [](GumInvocationListener *, GumInvocationContext *ic) {
+    std::size_t tp = GUM_IC_GET_FUNC_DATA(ic, std::size_t);
+    if (tp == 'r') {
+      if (hook_inited) {
+        spdlog::warn("call init multiple times, ignore");
+        return;
+      }
+      uinspect::HookInit();
+      hook_inited = true;
+    }
+  };
+  // spdlog::warn("uinspect entry invalid, type: {}", type);
 }
 
 G_DEFINE_TYPE_EXTENDED(MainListener, main_listener, G_TYPE_OBJECT, 0,
@@ -37,13 +52,25 @@ static GumInvocationListener *main_listener;
 namespace uinspect {
 
 void uinspect_init() {
-  const char *entry = getenv("UINSPECT_ENTRY");
-  if (entry == NULL) {
-    entry = "main";
+  char type = 'p';
+  const char *sym = NULL;
+  {
+    sym = getenv("UINSPECT_ENTRY");
+    if (sym == NULL) {
+      sym = "p:main";
+    }
+    const char *delim = index(sym, ':');
+    if (delim == NULL || (delim - sym) != 1) {
+      spdlog::warn("uinspect entry invalid, entry: {}", sym);
+      return;
+    }
+    type = sym[0];
+    sym = delim + 1;
   }
-  GumAddress entry_addr = gum_module_find_export_by_name(NULL, entry);
+
+  GumAddress entry_addr = gum_module_find_export_by_name(NULL, sym);
   if (!entry_addr) {
-    spdlog::warn("cannot find entry address, entry: {}", entry);
+    spdlog::warn("cannot find entry address, entry: {}", sym);
     return;
   }
 
@@ -54,7 +81,7 @@ void uinspect_init() {
 
   gum_interceptor_begin_transaction(interceptor);
   gum_interceptor_attach(interceptor, GSIZE_TO_POINTER(entry_addr),
-                         main_listener, nullptr);
+                         main_listener, GSIZE_TO_POINTER(type));
   gum_interceptor_end_transaction(interceptor);
   uinspect_inited = true;
 }
