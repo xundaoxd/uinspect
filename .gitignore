@@ -361,3 +361,5 @@ Temporary Items
 
 build
 .cache
+*.log
+
