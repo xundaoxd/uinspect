@@ -1,5 +1,7 @@
 #pragma once
 
+#include <exception>
+#include <string>
 #include <utility>
 
 #include "frida-gum.h"
@@ -14,6 +16,28 @@ inline GumAddress ResolveAddr(const char* sym) {
   if (addr) {
     return addr;
   }
+  char tmp[512];
+  strncpy(tmp, sym, sizeof(tmp));
+
+  char* delim = index(tmp, ':');
+  if (delim == NULL) {
+    return 0;
+  }
+  *delim = '\0';
+  addr = gum_module_find_export_by_name(tmp, delim + 1);
+  if (addr) {
+    return addr;
+  }
+  addr = gum_module_find_symbol_by_name(tmp, delim + 1);
+  if (addr) {
+    return addr;
+  }
+
+  try {
+    // auto offset = std::stoul(delim + 1);
+    // TODO: impl
+  } catch (std::exception&) {
+  };
 
   return 0;
 }
