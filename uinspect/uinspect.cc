@@ -46,31 +46,37 @@ G_DEFINE_TYPE_EXTENDED(MainListener, main_listener, G_TYPE_OBJECT, 0,
                        G_IMPLEMENT_INTERFACE(GUM_TYPE_INVOCATION_LISTENER,
                                              main_listener_iface_init))
 
+char type = 'p';
+const char *entry_sym = nullptr;
+
 GumInterceptor *interceptor;
 static GumInvocationListener *main_listener;
 
 namespace uinspect {
 
+int parse_entry() {
+  entry_sym = getenv("UINSPECT_ENTRY");
+  if (entry_sym == NULL) {
+    entry_sym = "p:main";
+  }
+  const char *delim = index(entry_sym, ':');
+  if (delim == NULL || (delim - entry_sym) != 1) {
+    spdlog::error("uinspect entry invalid, entry: {}", entry_sym);
+    return 1;
+  }
+  type = entry_sym[0];
+  entry_sym = delim + 1;
+  return 0;
+}
+
 void uinspect_init() {
-  char type = 'p';
-  const char *sym = NULL;
-  {
-    sym = getenv("UINSPECT_ENTRY");
-    if (sym == NULL) {
-      sym = "p:main";
-    }
-    const char *delim = index(sym, ':');
-    if (delim == NULL || (delim - sym) != 1) {
-      spdlog::warn("uinspect entry invalid, entry: {}", sym);
-      return;
-    }
-    type = sym[0];
-    sym = delim + 1;
+  if (parse_entry()) {
+    return;
   }
 
-  GumAddress entry_addr = gum_module_find_export_by_name(NULL, sym);
+  GumAddress entry_addr = gum_module_find_export_by_name(NULL, entry_sym);
   if (!entry_addr) {
-    spdlog::warn("cannot find entry address, entry: {}", sym);
+    spdlog::error("cannot find entry address, entry: {}", entry_sym);
     return;
   }
 
