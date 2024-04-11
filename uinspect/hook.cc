@@ -1,4 +1,4 @@
-#include "Hook.h"
+#include "hook.h"
 
 #include <strings.h>
 
@@ -39,7 +39,7 @@ static GumInvocationListener *hook_listener;
 
 namespace uinspect {
 
-void HookInit() {
+void hook_init() {
   hook_listener =
       (GumInvocationListener *)g_object_new(FUNC_TYPE_LISTENER, NULL);
   gum_interceptor_begin_transaction(interceptor);
@@ -55,7 +55,7 @@ void HookInit() {
   }
   gum_interceptor_end_transaction(interceptor);
 }
-void HookDeinit() {
+void hook_deinit() {
   gum_interceptor_detach(interceptor, hook_listener);
   g_object_unref(hook_listener);
 }

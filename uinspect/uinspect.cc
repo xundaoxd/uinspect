@@ -1,5 +1,5 @@
-#include "Hook.h"
 #include "frida-gum.h"
+#include "hook.h"
 #include "spdlog/spdlog.h"
 
 static bool uinspect_inited = false;
@@ -24,7 +24,7 @@ static void main_listener_iface_init(gpointer g_iface, gpointer) {
         spdlog::warn("call init multiple times, ignore");
         return;
       }
-      uinspect::HookInit();
+      uinspect::hook_init();
       hook_inited = true;
     }
   };
@@ -35,7 +35,7 @@ static void main_listener_iface_init(gpointer g_iface, gpointer) {
         spdlog::warn("call init multiple times, ignore");
         return;
       }
-      uinspect::HookInit();
+      uinspect::hook_init();
       hook_inited = true;
     }
   };
@@ -89,7 +89,7 @@ void uinspect_init() {
 void uinspect_deinit() {
   if (uinspect_inited) {
     if (hook_inited) {
-      uinspect::HookDeinit();
+      uinspect::hook_deinit();
     }
     gum_interceptor_detach(interceptor, main_listener);
     g_object_unref(main_listener);
