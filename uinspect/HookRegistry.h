@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "common.h"
 #include "spdlog/spdlog.h"
+#include "utils.h"
 
 namespace uinspect {
 

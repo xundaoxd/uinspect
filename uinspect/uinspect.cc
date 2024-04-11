@@ -2,7 +2,7 @@
 #include "frida-gum.h"
 #include "hook.h"
 #include "spdlog/spdlog.h"
-#include "common.h"
+#include "utils.h"
 
 static bool uinspect_inited = false;
 static bool hook_inited = false;

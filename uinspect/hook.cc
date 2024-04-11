@@ -4,9 +4,9 @@
 
 #include "FunctionListener.h"
 #include "HookRegistry.h"
-#include "common.h"
 #include "frida-gum.h"
 #include "spdlog/spdlog.h"
+#include "utils.h"
 
 extern GumInterceptor *interceptor;
 static UinspectFunctionListener *listener;
