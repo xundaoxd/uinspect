@@ -1,6 +1,6 @@
 #include <cstdint>
-#include <iostream>
 
+#include "spdlog/spdlog.h"
 #include "uinspect/HookRegistry.h"
 #include "uinspect/PerfMonitor.h"
 
@@ -18,19 +18,12 @@ thread_local uinspect::PerfMonitor monitor = []() {
 }();
 
 static void print_enter(uinspect::HookEntry*) {
-  std::cout << "[uinspect] print enter" << std::endl;
   monitor.Update();
+  spdlog::info("enter {} {} {}", cycle, inst, page_fault);
 }
 static void print_exit(uinspect::HookEntry*) {
-  auto prev_fault = page_fault;
-  auto prev_cycle = cycle;
-  auto prev_inst = inst;
   monitor.Update();
-  std::cout << "[uinspect] print leave" << std::endl;
-  std::cout << "[uinspect] page fault: " << page_fault - prev_fault
-            << std::endl;
-  std::cout << "[uinspect] inst: " << inst - prev_inst << std::endl;
-  std::cout << "[uinspect] cycle: " << cycle - prev_cycle << std::endl;
+  spdlog::info("exit {} {} {}", cycle, inst, page_fault);
 }
 
 UINSPECT_HOOK(":_Z5printv", print_enter, print_exit)

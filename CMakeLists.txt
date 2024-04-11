@@ -19,6 +19,12 @@ add_library(uinspect SHARED ${SRCS})
 target_include_directories(uinspect PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(uinspect PUBLIC frida::frida spdlog)
 
+install(TARGETS uinspect spdlog
+    LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
+)
+
 option(UINSPECT_BUILD_EXAMPLE "Build Example" ON)
 if(${UINSPECT_BUILD_EXAMPLE})
     add_subdirectory(example)
