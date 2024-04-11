@@ -19,23 +19,23 @@ void hook_init() {
   listener->on_enter = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    if (entry->enter) {
-      entry->enter(entry);
+    if (entry->on_enter) {
+      entry->on_enter(entry);
     }
   };
   listener->on_leave = [](GumInvocationListener *, GumInvocationContext *ic) {
     uinspect::HookEntry *entry =
         GUM_IC_GET_FUNC_DATA(ic, uinspect::HookEntry *);
-    if (entry->exit) {
-      entry->exit(entry);
+    if (entry->on_leave) {
+      entry->on_leave(entry);
     }
   };
 
   gum_interceptor_begin_transaction(interceptor);
   for (auto &&entry : uinspect::HookRegistry::Instance()->hooks) {
-    GumAddress entry_addr = ResolveSym(entry.sym.c_str());
+    GumAddress entry_addr = ResolveAddr(entry.slot.c_str());
     if (!entry_addr) {
-      spdlog::warn("cannot find sym address, sym: {}", entry.sym);
+      spdlog::warn("cannot find sym address, slot: {}", entry.slot);
       continue;
     }
     gum_interceptor_attach(interceptor, GSIZE_TO_POINTER(entry_addr),

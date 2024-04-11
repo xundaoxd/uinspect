@@ -9,7 +9,7 @@
 
 namespace uinspect {
 
-inline GumAddress ResolveSym(const char* sym) {
+inline GumAddress ResolveAddr(const char* sym) {
   auto addr = gum_module_find_export_by_name(NULL, sym);
   if (addr) {
     return addr;

@@ -15,27 +15,30 @@ static UinspectFunctionListener *listener;
 
 namespace uinspect {
 
-static int parse_entry() {
+static bool parse_entry() {
   const char *entry_sym = getenv("UINSPECT_ENTRY");
   if (entry_sym == NULL) {
     entry_sym = "p:main";
   }
   const char *delim = index(entry_sym, ':');
-  if (delim == NULL || (delim - entry_sym) != 1) {
-    spdlog::error("uinspect entry invalid, entry: {}", entry_sym);
-    return 1;
+  if (delim != NULL) {
+    if (delim - entry_sym == 1) {
+      hook_type = entry_sym[0];
+      entry_sym = delim + 1;
+    } else {
+      spdlog::error("uinspect entry invalid, entry: {}", entry_sym);
+      return false;
+    }
   }
-  hook_type = entry_sym[0];
-  entry_sym = delim + 1;
-  hook_addr = ResolveSym(entry_sym);
+  hook_addr = ResolveAddr(entry_sym);
   if (!hook_addr) {
-    return 1;
+    return false;
   }
-  return 0;
+  return true;
 }
 
 void uinspect_init() {
-  if (parse_entry()) {
+  if (!parse_entry()) {
     return;
   }
 
