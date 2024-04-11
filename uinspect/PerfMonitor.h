@@ -48,10 +48,9 @@ class PerfMonitor {
     pe.config = e;
 
     pe.disabled = 1;
-    pe.inherit = 0;
+
     pe.exclude_kernel = 1;
     pe.exclude_hv = 1;
-    pe.exclude_guest = 1;
     pe.exclude_idle = 1;
 
     pe.read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
@@ -67,10 +66,9 @@ class PerfMonitor {
     pe.config = e;
 
     pe.disabled = 1;
-    pe.inherit = 0;
+
     pe.exclude_kernel = 1;
     pe.exclude_hv = 1;
-    pe.exclude_guest = 1;
     pe.exclude_idle = 1;
 
     pe.read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
