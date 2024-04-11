@@ -4,6 +4,7 @@
 
 #include "FunctionListener.h"
 #include "HookRegistry.h"
+#include "common.h"
 #include "frida-gum.h"
 #include "spdlog/spdlog.h"
 
@@ -32,8 +33,7 @@ void hook_init() {
 
   gum_interceptor_begin_transaction(interceptor);
   for (auto &&entry : uinspect::HookRegistry::Instance()->hooks) {
-    GumAddress entry_addr =
-        gum_module_find_export_by_name(NULL, entry.sym.c_str());
+    GumAddress entry_addr = ResolveSym(entry.sym.c_str());
     if (!entry_addr) {
       spdlog::warn("cannot find sym address, sym: {}", entry.sym);
       continue;

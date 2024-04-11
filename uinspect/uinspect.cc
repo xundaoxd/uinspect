@@ -2,12 +2,13 @@
 #include "frida-gum.h"
 #include "hook.h"
 #include "spdlog/spdlog.h"
+#include "common.h"
 
 static bool uinspect_inited = false;
 static bool hook_inited = false;
 
-static char type = 'p';
-static const char *entry_sym = nullptr;
+static char hook_type = 'p';
+static GumAddress hook_addr = 0;
 
 GumInterceptor *interceptor;
 static UinspectFunctionListener *listener;
@@ -15,7 +16,7 @@ static UinspectFunctionListener *listener;
 namespace uinspect {
 
 static int parse_entry() {
-  entry_sym = getenv("UINSPECT_ENTRY");
+  const char *entry_sym = getenv("UINSPECT_ENTRY");
   if (entry_sym == NULL) {
     entry_sym = "p:main";
   }
@@ -24,8 +25,12 @@ static int parse_entry() {
     spdlog::error("uinspect entry invalid, entry: {}", entry_sym);
     return 1;
   }
-  type = entry_sym[0];
+  hook_type = entry_sym[0];
   entry_sym = delim + 1;
+  hook_addr = ResolveSym(entry_sym);
+  if (!hook_addr) {
+    return 1;
+  }
   return 0;
 }
 
@@ -34,17 +39,11 @@ void uinspect_init() {
     return;
   }
 
-  GumAddress entry_addr = gum_module_find_export_by_name(NULL, entry_sym);
-  if (!entry_addr) {
-    spdlog::error("cannot find entry address, entry: {}", entry_sym);
-    return;
-  }
-
   gum_init_embedded();
   interceptor = gum_interceptor_obtain();
   listener = UINSPECT_FUNCTION_LISTENER(
       g_object_new(UINSPECT_TYPE_FUNCTION_LISTENER, NULL));
-  if (type == 'p') {
+  if (hook_type == 'p') {
     listener->on_enter = [](GumInvocationListener *, GumInvocationContext *) {
       if (hook_inited) {
         spdlog::warn("call init multiple times, ignore");
@@ -53,7 +52,7 @@ void uinspect_init() {
       uinspect::hook_init();
       hook_inited = true;
     };
-  } else if (type == 'r') {
+  } else if (hook_type == 'r') {
     listener->on_leave = [](GumInvocationListener *, GumInvocationContext *) {
       if (hook_inited) {
         spdlog::warn("call init multiple times, ignore");
@@ -63,7 +62,7 @@ void uinspect_init() {
       hook_inited = true;
     };
   } else {
-    spdlog::error("unknown hook type: {}", type);
+    spdlog::error("unknown hook type: {}", hook_type);
     g_object_unref(listener);
     g_object_unref(interceptor);
     gum_deinit_embedded();
@@ -71,7 +70,7 @@ void uinspect_init() {
   }
 
   gum_interceptor_begin_transaction(interceptor);
-  gum_interceptor_attach(interceptor, GSIZE_TO_POINTER(entry_addr),
+  gum_interceptor_attach(interceptor, GSIZE_TO_POINTER(hook_addr),
                          GUM_INVOCATION_LISTENER(listener), nullptr);
   gum_interceptor_end_transaction(interceptor);
   uinspect_inited = true;

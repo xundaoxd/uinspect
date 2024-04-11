@@ -2,10 +2,21 @@
 
 #include <utility>
 
+#include "frida-gum.h"
+
 #define UINSPECT__CAT(x, y) x##y
 #define UINSPECT_CAT(x, y) UINSPECT__CAT(x, y)
 
 namespace uinspect {
+
+inline GumAddress ResolveSym(const char* sym) {
+  auto addr = gum_module_find_export_by_name(NULL, sym);
+  if (addr) {
+    return addr;
+  }
+
+  return 0;
+}
 
 template <typename F>
 auto MakeConstructor(F&& f) -> decltype(auto) {
