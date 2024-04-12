@@ -19,24 +19,32 @@ class PerfMonitor {
   std::vector<char> buf_;
 
   int Monitor(struct perf_event_attr *hw_event, pid_t pid, int cpu,
-              unsigned long flags) {
+              int group_fd, unsigned long flags) {
     int ret;
-    ret = syscall(SYS_perf_event_open, hw_event, pid, cpu, fd_,
-                  flags | PERF_FLAG_FD_CLOEXEC);
-    if (fd_ == -1 && ret != -1) {
-      fd_ = ret;
-    }
+    ret = syscall(SYS_perf_event_open, hw_event, pid, cpu, group_fd, flags);
     return ret;
   }
 
  public:
   int Monitor(struct perf_event_attr *hw_event, std::uint64_t *val) {
-    int ret = Monitor(hw_event, 0, -1, 0);
-    if (ret != -1) {
-      std::uint64_t id;
-      ioctl(ret, PERF_EVENT_IOC_ID, &id);
-      id2addr_.emplace(id, val);
+    hw_event->disabled = 1;
+
+    hw_event->exclude_kernel = 1;
+    hw_event->exclude_hv = 1;
+    hw_event->exclude_idle = 1;
+
+    hw_event->read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
+
+    int ret = Monitor(hw_event, 0, -1, fd_, PERF_FLAG_FD_CLOEXEC);
+    if (ret == -1) {
+      return ret;
     }
+    if (fd_ == -1) {
+      fd_ = ret;
+    }
+    std::uint64_t id;
+    ioctl(ret, PERF_EVENT_IOC_ID, &id);
+    id2addr_.emplace(id, val);
     return ret;
   }
   int Monitor(perf_sw_ids e, std::uint64_t *val) {
@@ -46,15 +54,6 @@ class PerfMonitor {
     pe.size = sizeof(pe);
     pe.type = PERF_TYPE_SOFTWARE;
     pe.config = e;
-
-    pe.disabled = 1;
-
-    pe.exclude_kernel = 1;
-    pe.exclude_hv = 1;
-    pe.exclude_idle = 1;
-
-    pe.read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
-
     return Monitor(&pe, val);
   }
   int Monitor(perf_hw_id e, std::uint64_t *val) {
@@ -64,15 +63,15 @@ class PerfMonitor {
     pe.size = sizeof(pe);
     pe.type = PERF_TYPE_HARDWARE;
     pe.config = e;
+    return Monitor(&pe, val);
+  }
+  int Monitor(std::uint64_t e, std::uint64_t *val) {
+    struct perf_event_attr pe;
+    memset(&pe, 0, sizeof(pe));
 
-    pe.disabled = 1;
-
-    pe.exclude_kernel = 1;
-    pe.exclude_hv = 1;
-    pe.exclude_idle = 1;
-
-    pe.read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
-
+    pe.size = sizeof(pe);
+    pe.type = PERF_TYPE_RAW;
+    pe.config = e;
     return Monitor(&pe, val);
   }
 
