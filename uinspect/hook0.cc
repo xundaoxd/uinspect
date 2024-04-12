@@ -1,6 +1,8 @@
+#include "hook0.h"
+
 #include "FunctionListener.h"
 #include "frida-gum.h"
-#include "hook.h"
+#include "hook1.h"
 #include "spdlog/spdlog.h"
 #include "utils.h"
 
@@ -37,7 +39,7 @@ static bool parse_entry() {
   return true;
 }
 
-void uinspect_init() {
+void hook0_init() {
   if (!parse_entry()) {
     return;
   }
@@ -52,7 +54,7 @@ void uinspect_init() {
         spdlog::warn("call init multiple times, ignore");
         return;
       }
-      uinspect::hook_init();
+      uinspect::hook1_init();
       hook_inited = true;
     };
   } else if (hook_type == 'r') {
@@ -61,7 +63,7 @@ void uinspect_init() {
         spdlog::warn("call init multiple times, ignore");
         return;
       }
-      uinspect::hook_init();
+      uinspect::hook1_init();
       hook_inited = true;
     };
   } else {
@@ -79,10 +81,10 @@ void uinspect_init() {
   uinspect_inited = true;
 }
 
-void uinspect_deinit() {
+void hook0_deinit() {
   if (uinspect_inited) {
     if (hook_inited) {
-      uinspect::hook_deinit();
+      uinspect::hook1_deinit();
     }
     gum_interceptor_detach(interceptor, GUM_INVOCATION_LISTENER(listener));
     g_object_unref(listener);

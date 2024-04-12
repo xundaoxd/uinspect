@@ -1,8 +1,8 @@
 #include <string>
 
+#include "hook0.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/spdlog.h"
-#include "uinspect.h"
 #include "utils.h"
 
 UINSPECT_CONSTRUCTOR([]() {
@@ -14,5 +14,5 @@ UINSPECT_CONSTRUCTOR([]() {
   spdlog::set_default_logger(logger);
 })
 
-UINSPECT_CONSTRUCTOR([]() { uinspect::uinspect_init(); })
-UINSPECT_DESTRUCTOR([]() { uinspect::uinspect_deinit(); })
+UINSPECT_CONSTRUCTOR([]() { uinspect::hook0_init(); })
+UINSPECT_DESTRUCTOR([]() { uinspect::hook0_deinit(); })
