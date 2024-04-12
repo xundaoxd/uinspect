@@ -91,6 +91,9 @@ class PerfMonitor {
         sizeof(std::uint64_t) + id2addr_.size() * sizeof(read_format);
     buf_.resize(size);
     ssize_t len = read(fd_, buf_.data(), buf_.size());
+    if (len <= 0) {
+      return len;
+    }
     read_format *items =
         reinterpret_cast<read_format *>(buf_.data() + sizeof(std::uint64_t));
     for (std::uint64_t i = 0;
