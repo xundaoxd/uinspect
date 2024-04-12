@@ -17,13 +17,15 @@ thread_local uinspect::PerfMonitor monitor = []() {
   return monitor;
 }();
 
-static void print_enter(uinspect::HookEntry*) {
+static void print_enter(uinspect::HookEntry* entry) {
   monitor.Update();
-  spdlog::info("enter {} {} {}", cycle, inst, page_fault);
+  spdlog::info("{} enter {} {} {}", entry->slot, cycle, inst, page_fault);
 }
-static void print_exit(uinspect::HookEntry*) {
+static void print_exit(uinspect::HookEntry* entry) {
   monitor.Update();
-  spdlog::info("exit {} {} {}", cycle, inst, page_fault);
+  spdlog::info("{} exit {} {} {}", entry->slot, cycle, inst, page_fault);
 }
 
 UINSPECT_HOOK("_Z5printv", print_enter, print_exit)
+UINSPECT_HOOK("_ZL12static_printv", print_enter, print_exit)
+UINSPECT_HOOK(":0x11dc", print_enter, print_exit)

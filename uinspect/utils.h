@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 
+#include "SegmentManager.h"
 #include "frida-gum.h"
 
 #define UINSPECT__CAT(x, y) x##y
@@ -34,8 +35,11 @@ inline GumAddress ResolveAddr(const char* sym) {
   }
 
   try {
-    // auto offset = std::stoul(delim + 1);
-    // TODO: impl
+    auto offset = std::stoul(delim + 1);
+    auto info = SegmentManager::Instance()->FindSegmentByFile(tmp, offset);
+    if (info) {
+      return info->mem_addr + offset - info->file_addr;
+    }
   } catch (std::exception&) {
   };
 
