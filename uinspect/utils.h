@@ -35,7 +35,7 @@ inline GumAddress ResolveAddr(const char* sym) {
   }
 
   try {
-    auto offset = std::stoul(delim + 1);
+    auto offset = std::stoul(delim + 1, nullptr, 0);
     auto info = SegmentManager::Instance()->FindSegmentByFile(tmp, offset);
     if (info) {
       return info->mem_addr + offset - info->file_addr;
