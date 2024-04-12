@@ -25,6 +25,8 @@ class SegmentManager {
 
  public:
   static SegmentManager* Instance();
+
+  void Refresh();
   const SegmentInfo* FindSegmentByFile(const char* name, ElfW(Off) addr);
 };
 

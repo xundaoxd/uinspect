@@ -2,7 +2,14 @@
 
 namespace uinspect {
 
-SegmentManager::SegmentManager() {
+SegmentManager::SegmentManager() { Refresh(); }
+
+SegmentManager* SegmentManager::Instance() {
+  static SegmentManager inst;
+  return &inst;
+}
+
+void SegmentManager::Refresh() {
   dl_iterate_phdr(
       [](struct dl_phdr_info* info, size_t, void* self) {
         SegmentManager* manager = (SegmentManager*)(self);
@@ -23,11 +30,6 @@ SegmentManager::SegmentManager() {
         return 0;
       },
       this);
-}
-
-SegmentManager* SegmentManager::Instance() {
-  static SegmentManager inst;
-  return &inst;
 }
 
 const SegmentInfo* SegmentManager::FindSegmentByFile(const char* name,
