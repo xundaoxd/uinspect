@@ -1,3 +1,7 @@
+#include <unistd.h>
+
+#include <fstream>
+#include <sstream>
 #include <string>
 
 #include "hook0.h"
@@ -6,9 +10,23 @@
 #include "utils.h"
 
 UINSPECT_CONSTRUCTOR([]() {
-  std::string log_file = "uinspect.log";
-  if (const char *file = getenv("UINSPECT_LOG")) {
-    log_file = file;
+  std::string log_file = getenv("UINSPECT_LOG");
+  if (log_file.empty()) {
+    log_file = []() {
+      std::stringstream tmp;
+      if (char* p = getenv("UINSPECT_LOG_PREFIX")) {
+        tmp << p << '/';
+      }
+      tmp <<
+          []() {
+            std::string tmp;
+            std::fstream fs("/proc/self/comm");
+            fs >> tmp;
+            return tmp;
+          }()
+          << '-' << std::to_string(gettid()) << ".log";
+      return tmp.str();
+    }();
   }
   auto logger = spdlog::basic_logger_mt("uinspect", log_file, true);
   spdlog::set_default_logger(logger);
