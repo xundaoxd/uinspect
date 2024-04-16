@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(uinspect VERSION 0.0.1)
+project(uinspect VERSION 0.0.2)
 
 include(GNUInstallDirs)
 

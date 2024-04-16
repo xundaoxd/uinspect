@@ -10,8 +10,10 @@
 #include "utils.h"
 
 UINSPECT_CONSTRUCTOR([]() {
-  std::string log_file = getenv("UINSPECT_LOG");
-  if (log_file.empty()) {
+  std::string log_file;
+  if (const char* tmp = getenv("UINSPECT_LOG")) {
+    log_file = tmp;
+  } else {
     log_file = []() {
       std::stringstream tmp;
       if (char* p = getenv("UINSPECT_LOG_PREFIX")) {
