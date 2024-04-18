@@ -41,6 +41,7 @@ static bool parse_entry() {
 
 void hook0_init() {
   if (!parse_entry()) {
+    spdlog::warn("cannot find entry slot");
     return;
   }
 
