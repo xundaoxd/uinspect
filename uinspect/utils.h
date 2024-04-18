@@ -29,10 +29,6 @@ inline GumAddress ResolveAddr(const char* sym) {
   if (addr) {
     return addr;
   }
-  addr = gum_module_find_symbol_by_name(tmp, delim + 1);
-  if (addr) {
-    return addr;
-  }
 
   try {
     auto offset = std::stoul(delim + 1, nullptr, 0);
