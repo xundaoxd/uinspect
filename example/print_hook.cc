@@ -26,5 +26,4 @@ static void print_exit(uinspect::HookEntry* entry) {
   spdlog::info("{} exit {} {} {}", entry->slot, cycle, inst, page_fault);
 }
 
-UINSPECT_HOOK(":0x11a9", print_enter, print_exit)
-UINSPECT_HOOK(":0x11dc", print_enter, print_exit)
+UINSPECT_HOOK(":_Z5printv", print_enter, print_exit)
