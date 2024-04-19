@@ -25,7 +25,7 @@ install(TARGETS uinspect spdlog
     RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
 )
 
-option(UINSPECT_BUILD_EXAMPLE "Build Example" ON)
+option(UINSPECT_BUILD_EXAMPLE "Build Example" OFF)
 if(${UINSPECT_BUILD_EXAMPLE})
     add_subdirectory(example)
 endif()
