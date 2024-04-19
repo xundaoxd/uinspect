@@ -25,12 +25,13 @@ void SegmentManager::Refresh() {
             auto mem_sz = info->dlpi_phdr[i].p_memsz;
 
             std::string name;
-            if (strlen(info->dlpi_name)) {
-              char real_path[1024];
-              if (realpath(info->dlpi_name, real_path) == NULL) {
-                name = info->dlpi_name;
-              } else {
+            if (info->dlpi_name && strlen(info->dlpi_name)) {
+              char* real_path;
+              if ((real_path = realpath(info->dlpi_name, NULL)) != NULL) {
                 name = real_path;
+                free(real_path);
+              } else {
+                name = info->dlpi_name;
               }
             }
 
@@ -48,12 +49,14 @@ const SegmentInfo* SegmentManager::FindSegmentByFile(const char* name,
                                                      ElfW(Off) addr) {
   auto iter = name2segment.find(name);
   if (iter == name2segment.end()) {
-    char real_path[1024];
-    if (realpath(name, real_path) == NULL) {
-      return nullptr;
-    }
-    iter = name2segment.find(real_path);
-    if (iter == name2segment.end()) {
+    char* real_path;
+    if ((real_path = realpath(name, NULL)) != NULL) {
+      iter = name2segment.find(real_path);
+      free(real_path);
+      if (iter == name2segment.end()) {
+        return nullptr;
+      }
+    } else {
       return nullptr;
     }
   }
