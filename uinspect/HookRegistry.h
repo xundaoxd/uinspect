@@ -27,6 +27,13 @@ inline void new_hook(const char *slot, void (*enter)(HookEntry *),
   HookRegistry::Instance()->hooks.emplace_back(std::move(entry));
 }
 
+inline void new_hook(void *addr, void (*enter)(HookEntry *),
+                     void (*exit)(HookEntry *)) {
+  char tmp[128];
+  sprintf(tmp, "%p", addr);
+  new_hook(tmp, enter, exit);
+}
+
 }  // namespace uinspect
 
 #define UINSPECT_HOOK(...) \

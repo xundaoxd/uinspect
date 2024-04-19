@@ -20,7 +20,7 @@ namespace uinspect {
 static bool parse_entry() {
   const char *entry_sym = getenv("UINSPECT_ENTRY");
   if (entry_sym == NULL) {
-    entry_sym = "p:main";
+    entry_sym = "p::main";
   }
   const char *delim = index(entry_sym, ':');
   if (delim != NULL) {
@@ -41,7 +41,7 @@ static bool parse_entry() {
 
 void hook0_init() {
   if (!parse_entry()) {
-    spdlog::warn("cannot find entry slot");
+    spdlog::error("cannot find entry slot");
     return;
   }
 
@@ -52,7 +52,7 @@ void hook0_init() {
   if (hook_type == 'p') {
     listener->on_enter = [](GumInvocationListener *, GumInvocationContext *) {
       if (hook_inited) {
-        spdlog::warn("call init multiple times, ignore");
+        spdlog::error("call init multiple times, ignore");
         return;
       }
       uinspect::hook1_init();
@@ -61,7 +61,7 @@ void hook0_init() {
   } else if (hook_type == 'r') {
     listener->on_leave = [](GumInvocationListener *, GumInvocationContext *) {
       if (hook_inited) {
-        spdlog::warn("call init multiple times, ignore");
+        spdlog::error("call init multiple times, ignore");
         return;
       }
       uinspect::hook1_init();

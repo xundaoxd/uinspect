@@ -35,7 +35,7 @@ void hook1_init() {
   for (auto &&entry : uinspect::HookRegistry::Instance()->hooks) {
     GumAddress entry_addr = ResolveAddr(entry.slot.c_str());
     if (!entry_addr) {
-      spdlog::warn("cannot find sym address, slot: {}", entry.slot);
+      spdlog::error("cannot find sym address, slot: {}", entry.slot);
       continue;
     }
     gum_interceptor_attach(interceptor, GSIZE_TO_POINTER(entry_addr),
