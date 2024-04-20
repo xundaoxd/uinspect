@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "spdlog/spdlog.h"
+
 namespace uinspect {
 
 SegmentManager::SegmentManager() { Refresh(); }
@@ -47,6 +49,9 @@ void SegmentManager::Refresh() {
 
 const SegmentInfo* SegmentManager::FindSegmentByFile(const char* name,
                                                      ElfW(Off) addr) {
+  for (auto&& item : name2segment) {
+    spdlog::info("segment module {}", item.first);
+  }
   auto iter = name2segment.find(name);
   if (iter == name2segment.end()) {
     char* real_path;
