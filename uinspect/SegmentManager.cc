@@ -49,6 +49,8 @@ void SegmentManager::Refresh() {
 
 const SegmentInfo* SegmentManager::FindSegmentByFile(const char* name,
                                                      ElfW(Off) addr) {
+  spdlog::info("FindSegmentByFile");
+  spdlog::info("find name: {}", name);
   for (auto&& item : name2segment) {
     spdlog::info("segment module {}", item.first);
   }
