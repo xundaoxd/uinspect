@@ -50,14 +50,15 @@ void SegmentManager::Refresh() {
 const SegmentInfo* SegmentManager::FindSegmentByFile(const char* name,
                                                      ElfW(Off) addr) {
   spdlog::info("FindSegmentByFile");
-  spdlog::info("find name: {}", name);
   for (auto&& item : name2segment) {
     spdlog::info("segment module {}", item.first);
   }
+  spdlog::info("find name: {}", name);
   auto iter = name2segment.find(name);
   if (iter == name2segment.end()) {
     char* real_path;
     if ((real_path = realpath(name, NULL)) != NULL) {
+      spdlog::info("find real path: {}", real_path);
       iter = name2segment.find(real_path);
       free(real_path);
       if (iter == name2segment.end()) {
