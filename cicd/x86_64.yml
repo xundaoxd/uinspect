@@ -1,0 +1,22 @@
+build:x86_64:
+  extends: .build_snapshot
+  tags:
+    - compilation
+  variables:
+    ARCH: x86_64
+
+build_release:x86_64:
+  extends: .build_release
+  tags:
+    - compilation
+  variables:
+    ARCH: x86_64
+
+snapshot:x86_64:
+  extends: .snapshot
+  needs: ["build:x86_64"]
+
+release:x86_64:
+  extends: .release
+  needs: ["build_release:x86_64"]
+

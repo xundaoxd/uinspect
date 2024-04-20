@@ -1,0 +1,21 @@
+include:
+  - project: 'deeproute-projects/public/cicd-common'
+    ref: development
+    file: 'global.gitlab-ci.yml'
+  - project: 'deeproute-projects/public/cicd-common'
+    ref: development
+    file: '/project/global.gitlab-ci.yml'
+  - project: 'deeproute-projects/public/cicd-common'
+    ref: development
+    file: '/project/build.gitlab-ci.yml'
+  - project: 'deeproute-projects/public/cicd-common'
+    ref: development
+    file: '/lib/ci.gitlab-ci.yml'
+  - project: 'deeproute-projects/public/cicd-common'
+    ref: development
+    file: '/lib/web.gitlab-ci.yml'
+  - local: '/cicd/common.yml'
+  - local: '/cicd/x86_64.yml'
+  - local: '/cicd/aarch64.yml'
+
+

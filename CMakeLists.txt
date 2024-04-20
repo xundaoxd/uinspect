@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(uinspect)
+project(uinspect VERSION 0.0.1)
 
 include(GNUInstallDirs)
 
@@ -25,8 +25,28 @@ install(TARGETS uinspect spdlog
     RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
 )
 
-option(UINSPECT_BUILD_EXAMPLE "Build Example" OFF)
+option(UINSPECT_BUILD_EXAMPLE "Build Example" ON)
 if(${UINSPECT_BUILD_EXAMPLE})
     add_subdirectory(example)
 endif()
+
+set(CPACK_GENERATOR DEB)
+
+option(UINSPECT_BUILD_SNAPSHOT "Build Snapshot" ON)
+if(${UINSPECT_BUILD_SNAPSHOT})
+set(CPACK_PACKAGE_NAME "deeproute-${CMAKE_PROJECT_NAME}-snapshot")
+else()
+set(CPACK_PACKAGE_NAME "deeproute-${CMAKE_PROJECT_NAME}-dev")
+endif()
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "yinchao yinchaogao@deeproute.ai")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64|arm64")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE arm64)
+elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "amd64|x86_64")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
+else()
+    message(FATAL_ERROR "Unknown arch ${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+set(CPACK_DEBIAN_COMPRESSION_TYPE xz)
+include(CPack)
 

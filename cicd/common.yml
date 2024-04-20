@@ -1,0 +1,114 @@
+variables:
+  DEBIAN_FRONTEND: noninteractive
+
+.common:
+  before_script:
+    - sed -i 's/ports.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+    - apt update
+
+.rules_snapshot:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "development"
+      when: always
+    - when: manual
+.rules_release:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /v.*/
+      when: always
+    - when: manual
+
+# need config:
+#   tags:
+#     - compilation
+#   variables:
+#     ARCH: x86_64 or aarch64
+.build_snapshot:
+  artifacts:
+    paths:
+      - build
+  image: ubuntu:20.04
+  before_script:
+    - !reference [.common, before_script]
+    - apt install -y build-essential wget git
+    - sh -c "wget -qO - https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-linux-$ARCH.tar.gz | tar -C /opt -xz"
+    - export PATH="/opt/cmake-3.23.1-linux-$ARCH/bin:${PATH}"
+  script:
+    - cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/deeproute/uinspect -DUINSPECT_BUILD_SNAPSHOT=ON
+    - cmake --build build -j 32
+    - cmake --build build -t package
+
+# need config:
+#   needs:
+.snapshot:
+  tags:
+    - compilation
+  artifacts:
+    paths:
+      - build
+  image: ubuntu:20.04
+  parallel:
+    matrix:
+      - snapshot_source:
+          - deeproute-snapshot-1804
+          - deeproute-snapshot-2004
+  variables:
+    FILENAME_DEB: /tmp.deb
+  rules:
+    - !reference [.rules_snapshot, rules]
+  before_script:
+    - !reference [.common, before_script]
+    - apt install -y curl wget
+  script:
+    - cp ./build/deeproute-*.deb /tmp/tmp.deb
+    - dpkg-deb -R /tmp/tmp.deb /pipeline
+    - cd /pipeline
+    - !reference [.old_upload_deb, snapshot]
+
+# need config:
+#   tags:
+#     - compilation
+#   variables:
+#     ARCH: x86_64 or aarch64
+.build_release:
+  artifacts:
+    paths:
+      - build
+  image: ubuntu:20.04
+  rules:
+    - !reference [.rules_release, rules]
+  before_script:
+    - !reference [.common, before_script]
+    - apt install -y build-essential wget git
+    - sh -c "wget -qO - https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-linux-$ARCH.tar.gz | tar -C /opt -xz"
+    - export PATH="/opt/cmake-3.23.1-linux-$ARCH/bin:${PATH}"
+  script:
+    - cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/deeproute/uinspect -DUINSPECT_BUILD_SNAPSHOT=OFF
+    - cmake --build build -j 32
+    - cmake --build build -t package
+
+# need config:
+#   needs:
+.release:
+  tags:
+    - compilation
+  artifacts:
+    paths:
+      - build
+  image: ubuntu:20.04
+  parallel:
+    matrix:
+      - release_source:
+          - deeproute-release-1804
+          - deeproute-release-2004
+  variables:
+    FILENAME_DEB: /tmp.deb
+  rules:
+    - !reference [.rules_release, rules]
+  before_script:
+    - !reference [.common, before_script]
+    - apt install -y curl wget
+  script:
+    - cp ./build/deeproute-*.deb /tmp/tmp.deb
+    - dpkg-deb -R /tmp/tmp.deb /pipeline
+    - !reference [.old_upload_deb, release]
+

@@ -1,0 +1,24 @@
+build:aarch64:
+  extends: .build_snapshot
+  tags:
+    - arm-platform
+  variables:
+    ARCH: aarch64
+
+build_release:aarch64:
+  extends: .build_release
+  tags:
+    - arm-platform
+  variables:
+    ARCH: aarch64
+
+snapshot:aarch64:
+  extends: .snapshot
+  needs: ["build:aarch64"]
+
+release:aarch64:
+  extends: .release
+  needs: ["build_release:aarch64"]
+
+
+
