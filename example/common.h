@@ -43,8 +43,14 @@ struct PerfCounter {
   std::uint64_t inst;
 
   PerfCounter() {
-    monitor.Monitor(PERF_COUNT_HW_CPU_CYCLES, &cycle);
-    monitor.Monitor(PERF_COUNT_HW_INSTRUCTIONS, &inst);
+    if (monitor.Monitor(PERF_COUNT_HW_CPU_CYCLES, &cycle) == -1) {
+      spdlog::error("cannot monitor cpu cycle, errno: {}, info: {}", errno,
+                    sys_errlist[errno]);
+    }
+    if (monitor.Monitor(PERF_COUNT_HW_INSTRUCTIONS, &inst) == -1) {
+      spdlog::error("cannot monitor cpu inst, errno: {}, info: {}", errno,
+                    sys_errlist[errno]);
+    }
     monitor.Reset();
     monitor.Enable();
   }
