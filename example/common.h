@@ -45,11 +45,11 @@ struct PerfCounter {
   PerfCounter() {
     if (monitor.Monitor(PERF_COUNT_HW_CPU_CYCLES, &cycle) == -1) {
       spdlog::error("cannot monitor cpu cycle, errno: {}, info: {}", errno,
-                    sys_errlist[errno]);
+                    strerror(errno));
     }
     if (monitor.Monitor(PERF_COUNT_HW_INSTRUCTIONS, &inst) == -1) {
       spdlog::error("cannot monitor cpu inst, errno: {}, info: {}", errno,
-                    sys_errlist[errno]);
+                    strerror(errno));
     }
     monitor.Reset();
     monitor.Enable();
