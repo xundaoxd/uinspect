@@ -31,7 +31,7 @@ class PerfMonitor {
 
     hw_event->exclude_kernel = 1;
     hw_event->exclude_hv = 1;
-    hw_event->exclude_idle = 1;
+    hw_event->exclude_guest = 1;
 
     hw_event->read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
 
