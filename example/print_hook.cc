@@ -1,3 +1,3 @@
 #include "common.h"
 
-UINSPECT_HOOK(":_Z5printv", func_enter, func_exit)
+UINSPECT_HOOK(":_Z10do_payloadi", func_enter, func_exit)
