@@ -14,4 +14,5 @@ target_link_options(print_demo PRIVATE -export-dynamic)
 add_hook(print_hook print_hook.cc)
 add_hook(planning_hook planning_hook.cc)
 add_hook(perception_hook perception_hook.cc)
+add_hook(map_engine_hook map_engine_hook.cc)
 
