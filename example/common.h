@@ -39,15 +39,31 @@ struct fmt::formatter<CurrentTimeInfo> : fmt::formatter<std::string> {
 
 struct PerfCounter {
   uinspect::PerfMonitor monitor;
-  std::uint64_t cycle;
+  std::uint64_t clock;
   std::uint64_t inst;
+  std::uint64_t page_fault;
+  std::uint64_t context_switch;
+  std::uint64_t cpu_migration;
 
   PerfCounter() {
-    if (monitor.Monitor(PERF_COUNT_HW_CPU_CYCLES, &cycle) == -1) {
-      spdlog::error("cannot monitor cpu cycle, errno: {}, info: {}", errno,
+    if (monitor.Monitor(PERF_COUNT_SW_TASK_CLOCK, &clock) == -1) {
+      spdlog::error("cannot monitor task clock, errno: {}, info: {}", errno,
                     strerror(errno));
     }
     if (monitor.Monitor(PERF_COUNT_HW_INSTRUCTIONS, &inst) == -1) {
+      spdlog::error("cannot monitor cpu inst, errno: {}, info: {}", errno,
+                    strerror(errno));
+    }
+    if (monitor.Monitor(PERF_COUNT_SW_PAGE_FAULTS, &page_fault) == -1) {
+      spdlog::error("cannot monitor cpu inst, errno: {}, info: {}", errno,
+                    strerror(errno));
+    }
+    if (monitor.Monitor(PERF_COUNT_SW_CONTEXT_SWITCHES, &context_switch) ==
+        -1) {
+      spdlog::error("cannot monitor cpu inst, errno: {}, info: {}", errno,
+                    strerror(errno));
+    }
+    if (monitor.Monitor(PERF_COUNT_SW_CPU_MIGRATIONS, &cpu_migration) == -1) {
       spdlog::error("cannot monitor cpu inst, errno: {}, info: {}", errno,
                     strerror(errno));
     }
@@ -66,13 +82,17 @@ struct PerfCounter {
 static void func_enter(uinspect::HookEntry *entry) {
   PerfCounter *counter = PerfCounter::Instance();
   counter->Update();
-  spdlog::info("enter {} {} {} {} {}", entry->slot, CommInfo(),
-               CurrentTimeInfo(), counter->cycle, counter->inst);
+  spdlog::info("enter {} {} {} {} {} {} {} {}", entry->slot, CommInfo(),
+               CurrentTimeInfo(), counter->clock, counter->inst,
+               counter->page_fault, counter->context_switch,
+               counter->cpu_migration);
 }
 
 static void func_exit(uinspect::HookEntry *entry) {
   PerfCounter *counter = PerfCounter::Instance();
   counter->Update();
-  spdlog::info("exit {} {} {} {} {}", entry->slot, CommInfo(),
-               CurrentTimeInfo(), counter->cycle, counter->inst);
+  spdlog::info("exit {} {} {} {} {} {} {} {}", entry->slot, CommInfo(),
+               CurrentTimeInfo(), counter->clock, counter->inst,
+               counter->page_fault, counter->context_switch,
+               counter->cpu_migration);
 }
