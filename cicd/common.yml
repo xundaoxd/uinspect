@@ -27,6 +27,8 @@ variables:
     paths:
       - build
   image: ubuntu:20.04
+  rules:
+    - !reference [.rules_snapshot, rules]
   before_script:
     - !reference [.common, before_script]
     - apt install -y build-essential wget git
